@@ -323,6 +323,24 @@ from PIL import Image, ImageDraw
 import numpy as np
 import matplotlib.pyplot as plt
 
+# 필요한 라이브러리 임포트 및 파이프라인 초기화
+import torch
+from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, UniPCMultistepScheduler
+
+# ControlNet 모델 로드
+controlnet = ControlNetModel.from_pretrained("lllyasviel/control_v11p_sd15_scribble", torch_dtype=torch.float16)
+
+# Stable Diffusion ControlNet 파이프라인 로드
+pipe = StableDiffusionControlNetPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5", controlnet=controlnet, torch_dtype=torch.float16
+)
+
+# 스케줄러 설정 (더 빠른 생성을 위함)
+pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+
+# GPU로 파이프라인 이동
+pipe.to("cuda")
+
 print("\n" + "="*70)
 print("🧪 실험 2: AAC 복합 의사소통 - 점진적 요소 추가 시 구조 보존")
 print("="*70)
